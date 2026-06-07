@@ -6,17 +6,25 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "node --watch index.js"
+    "dev": "node --watch index.js",
+    "init-db": "node src/scripts/initDB.js",
+    "seed": "node src/scripts/seedDB.js",
+    "migrate": "node src/scripts/migrate.js",
+    "admin:install": "npm --prefix admin install",
+    "admin:dev": "npm --prefix admin run dev",
+    "admin:build": "npm --prefix admin run build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.0",
     "express": "^5.2.1",
     "express-validator": "^7.3.2",
+    "jsonwebtoken": "^9.0.2",
     "pg": "^8.20.0"
   }
 }
