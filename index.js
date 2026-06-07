@@ -10,6 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 const port = process.env.PORT || 3000;
+const host = process.env.HOST || '0.0.0.0';
 
 // All API routes
 app.use('/api', apiRoutes);
@@ -19,6 +20,6 @@ app.get('/', (req, res) => {
   res.send('RiverEye API is running. Check /api/locations, /api/logs, and /api/predictions');
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+app.listen(port, host, () => {
+    console.log(`Server is running on http://${host}:${port}`);
 });
