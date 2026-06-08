@@ -48,6 +48,16 @@ async function migrate() {
     );
     console.log(`Default admin ensured (username: ${username}).`);
 
+    // Sinkronkan sequence id (seed memakai id eksplisit → nextval bisa tertinggal)
+    for (const table of ['locations', 'sensor_logs', 'ml_predictions']) {
+      await client.query(
+        `SELECT setval(pg_get_serial_sequence($1, 'id'),
+           GREATEST((SELECT COALESCE(MAX(id), 0) FROM ${table}), 1))`,
+        [table],
+      );
+    }
+    console.log('Sequences resynced.');
+
     await client.query('COMMIT');
     console.log('Migration completed successfully.');
   } catch (error) {
