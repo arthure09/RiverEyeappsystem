@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api, { errMsg } from '../api.js';
+import { IconWaves } from '../icons.jsx';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export default function Login() {
   return (
     <div className="login-wrap">
       <form className="login-card" onSubmit={submit}>
-        <div className="login-brand">🌊 RiverEye Admin</div>
+        <div className="login-brand"><IconWaves size={24} /> RiverEye Admin</div>
         <p className="login-sub">Masuk untuk mengelola titik pantau</p>
         {error && <div className="alert">{error}</div>}
         <label>Username</label>

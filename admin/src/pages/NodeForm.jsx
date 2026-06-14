@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import api, { errMsg } from '../api.js';
+import { IconDroplet, IconCamera, IconArrowLeft } from '../icons.jsx';
 
 const EMPTY = {
   name: '',
@@ -46,6 +47,18 @@ export default function NodeForm() {
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
+  // Jenis node ditentukan dari kombinasi has_sensor & has_camera
+  const jenis = form.has_camera && !form.has_sensor ? 'camera'
+    : form.has_sensor && form.has_camera ? 'both'
+    : 'sensor';
+
+  const setJenis = (value) =>
+    setForm((f) => ({
+      ...f,
+      has_sensor: value === 'sensor' || value === 'both',
+      has_camera: value === 'camera' || value === 'both',
+    }));
+
   const submit = async (e) => {
     e.preventDefault();
     setError('');
@@ -77,7 +90,7 @@ export default function NodeForm() {
     <div>
       <div className="page-head">
         <h1>{isEdit ? `Edit Node #${id}` : 'Tambah Node'}</h1>
-        <button className="btn" onClick={() => navigate('/')}>← Kembali</button>
+        <button className="btn" onClick={() => navigate('/')}><IconArrowLeft size={15} /> Kembali</button>
       </div>
 
       {error && <div className="alert">{error}</div>}
@@ -104,15 +117,20 @@ export default function NodeForm() {
           <label>Elevasi (m)</label>
           <input type="number" step="any" value={form.elevation ?? ''} onChange={(e) => set('elevation', e.target.value)} />
 
-          <div className="row2">
-            <label className="check">
-              <input type="checkbox" checked={!!form.has_sensor} onChange={(e) => set('has_sensor', e.target.checked)} />
-              Punya Sensor
-            </label>
-            <label className="check">
-              <input type="checkbox" checked={!!form.has_camera} onChange={(e) => set('has_camera', e.target.checked)} />
-              Punya CCTV
-            </label>
+          <label>Jenis Node *</label>
+          <div className="seg">
+            <button type="button" className={jenis === 'sensor' ? 'active' : ''} onClick={() => setJenis('sensor')}>
+              <IconDroplet size={20} />
+              Sensor Air
+            </button>
+            <button type="button" className={jenis === 'camera' ? 'active' : ''} onClick={() => setJenis('camera')}>
+              <IconCamera size={20} />
+              Kamera Pantau
+            </button>
+            <button type="button" className={jenis === 'both' ? 'active' : ''} onClick={() => setJenis('both')}>
+              <span className="seg-icons"><IconDroplet size={20} /><IconCamera size={20} /></span>
+              Keduanya
+            </button>
           </div>
 
           {form.has_camera && (

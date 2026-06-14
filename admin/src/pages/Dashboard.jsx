@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import api, { errMsg } from '../api.js';
 import { riskOf } from '../risk.js';
+import { IconDroplet, IconCamera } from '../icons.jsx';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -102,8 +103,8 @@ export default function Dashboard() {
                   <td>{n.name}</td>
                   <td className="mono">{Number(n.latitude).toFixed(4)}, {Number(n.longitude).toFixed(4)}</td>
                   <td>
-                    {n.has_sensor && <span className="chip">💧 Sensor</span>}
-                    {n.has_camera && <span className="chip">📹 CCTV</span>}
+                    {n.has_sensor && <span className="chip"><IconDroplet size={13} /> Sensor</span>}
+                    {n.has_camera && <span className="chip"><IconCamera size={13} /> CCTV</span>}
                   </td>
                   <td>{last ? `${last.water_level_cm} cm` : '—'}</td>
                   <td>{risk ? <span className="badge" style={{ background: risk.color + '22', color: risk.color }}>{risk.label}</span> : '—'}</td>

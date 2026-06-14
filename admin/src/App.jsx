@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate, NavLink, useNavigate } from 'react-router-dom';
+import { IconWaves, IconMapPin, IconDroplet, IconTrendingUp, IconLogout } from './icons.jsx';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import NodeForm from './pages/NodeForm.jsx';
@@ -20,13 +21,13 @@ function Shell({ children }) {
   return (
     <div className="shell">
       <aside className="sidebar">
-        <div className="brand">🌊 RiverEye<span>Admin</span></div>
+        <div className="brand"><IconWaves size={22} /> RiverEye<span>Admin</span></div>
         <nav>
-          <NavLink to="/" end>📍 Titik Pantau</NavLink>
-          <NavLink to="/logs">💧 Log Sensor</NavLink>
-          <NavLink to="/predictions">📈 Prediksi</NavLink>
+          <NavLink to="/" end><IconMapPin /> <span>Titik Pantau</span></NavLink>
+          <NavLink to="/logs"><IconDroplet /> <span>Log Sensor</span></NavLink>
+          <NavLink to="/predictions"><IconTrendingUp /> <span>Prediksi</span></NavLink>
         </nav>
-        <button className="logout" onClick={logout}>Keluar</button>
+        <button className="logout" onClick={logout}><IconLogout size={16} /> <span>Keluar</span></button>
       </aside>
       <main className="content">{children}</main>
     </div>
