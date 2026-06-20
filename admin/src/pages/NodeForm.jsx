@@ -14,6 +14,7 @@ const EMPTY = {
   cctv_url: '',
   risk_medium_cm: 150,
   risk_high_cm: 200,
+  status_override: '',
   description: '',
 };
 
@@ -70,6 +71,7 @@ export default function NodeForm() {
       elevation: form.elevation === '' ? null : Number(form.elevation),
       risk_medium_cm: Number(form.risk_medium_cm),
       risk_high_cm: Number(form.risk_high_cm),
+      status_override: form.status_override || null,
     };
     try {
       if (isEdit) await api.put(`/locations/${id}`, payload);
@@ -150,6 +152,15 @@ export default function NodeForm() {
               <input type="number" value={form.risk_high_cm} onChange={(e) => set('risk_high_cm', e.target.value)} />
             </div>
           </div>
+
+          <label>Status Manual</label>
+          <select value={form.status_override || ''} onChange={(e) => set('status_override', e.target.value)}>
+            <option value="">Otomatis (ikut sensor)</option>
+            <option value="aman">Aman</option>
+            <option value="waspada">Waspada</option>
+            <option value="siaga">Siaga</option>
+          </select>
+          <p className="muted">Pilih <b>Otomatis</b> agar status mengikuti ketinggian air sensor, atau setel manual untuk menimpanya.</p>
 
           <button className="btn primary" disabled={saving}>
             {saving ? 'Menyimpan...' : isEdit ? 'Simpan Perubahan' : 'Tambah Node'}

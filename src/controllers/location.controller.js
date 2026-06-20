@@ -11,6 +11,7 @@ const EDITABLE = [
   'cctv_url',
   'risk_medium_cm',
   'risk_high_cm',
+  'status_override',
   'description',
 ];
 
@@ -44,6 +45,9 @@ exports.getLocationById = async (req, res) => {
 };
 
 exports.createLocation = async (req, res) => {
+  // status_override kosong dari form → simpan NULL (mode otomatis dari sensor)
+  if (req.body.status_override === '') req.body.status_override = null;
+
   const { name, latitude, longitude } = req.body;
   if (!name || latitude === undefined || longitude === undefined) {
     return res.status(400).json({
@@ -73,6 +77,9 @@ exports.createLocation = async (req, res) => {
 };
 
 exports.updateLocation = async (req, res) => {
+  // status_override kosong dari form → simpan NULL (mode otomatis dari sensor)
+  if (req.body.status_override === '') req.body.status_override = null;
+
   const cols = EDITABLE.filter((c) => req.body[c] !== undefined);
   if (cols.length === 0) {
     return res.status(400).json({ status: 'error', message: 'Tidak ada data untuk diperbarui.' });

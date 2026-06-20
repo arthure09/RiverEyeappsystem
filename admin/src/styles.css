@@ -70,6 +70,8 @@ input:focus, textarea:focus { outline: none; border-color: var(--primary); }
 .actions { display: flex; gap: 6px; }
 .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; background: #f1f5f9; padding: 3px 7px; border-radius: 6px; margin-right: 4px; vertical-align: middle; }
 .badge { font-size: 12px; font-weight: 800; padding: 3px 9px; border-radius: 8px; }
+.status-cell { display: flex; align-items: center; gap: 8px; }
+.status-select { width: auto; min-width: 140px; padding: 5px 8px; font-size: 12px; border-radius: 8px; }
 
 .map-box { border-radius: 14px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 18px; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }

@@ -20,6 +20,7 @@ async function migrate() {
         ADD COLUMN IF NOT EXISTS cctv_url      TEXT,
         ADD COLUMN IF NOT EXISTS risk_medium_cm INT DEFAULT 150,
         ADD COLUMN IF NOT EXISTS risk_high_cm   INT DEFAULT 200,
+        ADD COLUMN IF NOT EXISTS status_override VARCHAR(20),
         ADD COLUMN IF NOT EXISTS description   TEXT,
         ADD COLUMN IF NOT EXISTS created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
     `);

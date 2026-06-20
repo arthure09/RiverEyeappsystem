@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import api, { errMsg } from '../api.js';
-import { riskOf } from '../risk.js';
+import { statusOf, STATUS_OPTIONS } from '../risk.js';
 import { IconDroplet, IconCamera } from '../icons.jsx';
 
 export default function Dashboard() {
@@ -48,6 +48,18 @@ export default function Dashboard() {
     }
   };
 
+  // Setel status manual sebuah node langsung dari tabel (kosong = otomatis).
+  const setStatus = async (node, value) => {
+    // Optimistic update agar dropdown terasa responsif
+    setNodes((list) => list.map((n) => (n.id === node.id ? { ...n, status_override: value } : n)));
+    try {
+      await api.put(`/locations/${node.id}`, { status_override: value || null });
+    } catch (err) {
+      alert(errMsg(err, 'Gagal mengubah status.'));
+      load();
+    }
+  };
+
   const center = nodes.length
     ? [Number(nodes[0].latitude), Number(nodes[0].longitude)]
     : [-7.2575, 112.7521];
@@ -74,9 +86,12 @@ export default function Dashboard() {
             <Marker key={n.id} position={[Number(n.latitude), Number(n.longitude)]}>
               <Popup>
                 <b>{n.name}</b><br />
-                {latestByLoc[n.id]
-                  ? `${latestByLoc[n.id].water_level_cm} cm — ${riskOf(latestByLoc[n.id].water_level_cm, n).label}`
-                  : 'Belum ada data sensor'}
+                {(() => {
+                  const last = latestByLoc[n.id];
+                  const st = statusOf(n, last?.water_level_cm);
+                  const level = last ? `${last.water_level_cm} cm` : 'Belum ada data sensor';
+                  return st ? `${level} — ${st.label}${st.auto ? '' : ' (manual)'}` : level;
+                })()}
               </Popup>
             </Marker>
           ))}
@@ -96,7 +111,7 @@ export default function Dashboard() {
           <tbody>
             {nodes.map((n) => {
               const last = latestByLoc[n.id];
-              const risk = last ? riskOf(last.water_level_cm, n) : null;
+              const st = statusOf(n, last?.water_level_cm);
               return (
                 <tr key={n.id}>
                   <td>{n.id}</td>
@@ -107,7 +122,25 @@ export default function Dashboard() {
                     {n.has_camera && <span className="chip"><IconCamera size={13} /> CCTV</span>}
                   </td>
                   <td>{last ? `${last.water_level_cm} cm` : '—'}</td>
-                  <td>{risk ? <span className="badge" style={{ background: risk.color + '22', color: risk.color }}>{risk.label}</span> : '—'}</td>
+                  <td>
+                    <div className="status-cell">
+                      {st
+                        ? <span className="badge" style={{ background: st.color + '22', color: st.color }}>
+                            {st.label}{st.auto ? '' : ' •'}
+                          </span>
+                        : <span className="muted">—</span>}
+                      <select
+                        className="status-select"
+                        value={n.status_override || ''}
+                        onChange={(e) => setStatus(n, e.target.value)}
+                        title="Setel status manual (• = manual)"
+                      >
+                        {STATUS_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </td>
                   <td className="actions">
                     <button className="btn small" onClick={() => navigate(`/nodes/${n.id}`)}>Edit</button>
                     <button className="btn small danger" onClick={() => remove(n)}>Hapus</button>
