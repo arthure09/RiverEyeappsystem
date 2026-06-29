@@ -18,6 +18,7 @@ async function migrate() {
         ADD COLUMN IF NOT EXISTS has_sensor    BOOLEAN DEFAULT TRUE,
         ADD COLUMN IF NOT EXISTS has_camera    BOOLEAN DEFAULT FALSE,
         ADD COLUMN IF NOT EXISTS cctv_url      TEXT,
+        ADD COLUMN IF NOT EXISTS risk_sedang_cm INT DEFAULT 100,
         ADD COLUMN IF NOT EXISTS risk_medium_cm INT DEFAULT 150,
         ADD COLUMN IF NOT EXISTS risk_high_cm   INT DEFAULT 200,
         ADD COLUMN IF NOT EXISTS status_override VARCHAR(20),
@@ -48,6 +49,28 @@ async function migrate() {
       [username, hash],
     );
     console.log(`Default admin ensured (username: ${username}).`);
+
+    // Index untuk performa query log sensor (timestamp-based pagination)
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_sensor_logs_timestamp   ON sensor_logs (timestamp DESC);
+      CREATE INDEX IF NOT EXISTS idx_sensor_logs_location_id ON sensor_logs (location_id);
+    `);
+    console.log('sensor_logs indexes created.');
+
+    // node_id: unique human-readable identifier per node type
+    await client.query(`
+      ALTER TABLE locations
+        ADD COLUMN IF NOT EXISTS node_id TEXT UNIQUE;
+    `);
+    await client.query(`
+      UPDATE locations SET node_id =
+        CASE
+          WHEN has_sensor AND has_camera THEN 'TX-'   || id
+          WHEN has_camera               THEN 'CCTV-' || id
+          ELSE                               'SNS-'  || id
+        END;
+    `);
+    console.log('node_id column added and backfilled.');
 
     // Sinkronkan sequence id (seed memakai id eksplisit → nextval bisa tertinggal)
     for (const table of ['locations', 'sensor_logs', 'ml_predictions']) {

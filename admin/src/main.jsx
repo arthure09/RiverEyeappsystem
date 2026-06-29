@@ -10,6 +10,7 @@ import './styles.css';
 import App from './App.jsx';
 
 // Perbaiki ikon marker default Leaflet yang rusak saat di-bundle Vite
+delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
   iconRetinaUrl: markerIcon2x,

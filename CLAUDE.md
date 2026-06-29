@@ -36,7 +36,7 @@ ML_API_KEY=<key for ML prediction service>
 PORT=3000   # optional, defaults to 3000
 ```
 
-The project uses Supabase-hosted PostgreSQL in practice.
+The project uses self-hosted PostgreSQL.
 
 ## Architecture
 

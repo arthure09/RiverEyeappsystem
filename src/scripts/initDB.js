@@ -5,7 +5,7 @@ async function initializeDatabase() {
   let client;
   try {
     client = await pool.connect();
-    console.log("successfully connected to Supabase PostgreSQL.");
+    console.log("Successfully connected to PostgreSQL.");
 
     await client.query('BEGIN');
     

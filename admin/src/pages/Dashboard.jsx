@@ -114,7 +114,7 @@ export default function Dashboard() {
               const st = statusOf(n, last?.water_level_cm);
               return (
                 <tr key={n.id}>
-                  <td>{n.id}</td>
+                  <td className="mono" style={{ fontSize: '0.82rem' }}>{n.node_id ?? n.id}</td>
                   <td>{n.name}</td>
                   <td className="mono">{Number(n.latitude).toFixed(4)}, {Number(n.longitude).toFixed(4)}</td>
                   <td>

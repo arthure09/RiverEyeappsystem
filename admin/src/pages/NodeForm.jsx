@@ -12,6 +12,7 @@ const EMPTY = {
   has_sensor: true,
   has_camera: false,
   cctv_url: '',
+  risk_sedang_cm: 100,
   risk_medium_cm: 150,
   risk_high_cm: 200,
   status_override: '',
@@ -63,14 +64,22 @@ export default function NodeForm() {
   const submit = async (e) => {
     e.preventDefault();
     setError('');
+    const sed  = Number(form.risk_sedang_cm);
+    const med  = Number(form.risk_medium_cm);
+    const high = Number(form.risk_high_cm);
+    if (!(sed < med && med < high)) {
+      setError('Urutan ambang harus: Sedang < Waspada < Siaga.');
+      return;
+    }
     setSaving(true);
     const payload = {
       ...form,
       latitude: Number(form.latitude),
       longitude: Number(form.longitude),
       elevation: form.elevation === '' ? null : Number(form.elevation),
-      risk_medium_cm: Number(form.risk_medium_cm),
-      risk_high_cm: Number(form.risk_high_cm),
+      risk_sedang_cm: sed,
+      risk_medium_cm: med,
+      risk_high_cm: high,
       status_override: form.status_override || null,
     };
     try {
@@ -91,7 +100,22 @@ export default function NodeForm() {
   return (
     <div>
       <div className="page-head">
-        <h1>{isEdit ? `Edit Node #${id}` : 'Tambah Node'}</h1>
+        <h1>
+          {isEdit ? `Edit Node` : 'Tambah Node'}
+          {isEdit && form.node_id && (
+            <span style={{
+              marginLeft: 10,
+              fontSize: '0.75rem',
+              fontFamily: 'monospace',
+              padding: '3px 10px',
+              borderRadius: 6,
+              background: 'rgba(99,179,237,0.15)',
+              color: '#63b3ed',
+              border: '1px solid rgba(99,179,237,0.3)',
+              verticalAlign: 'middle',
+            }}>{form.node_id}</span>
+          )}
+        </h1>
         <button className="btn" onClick={() => navigate('/')}><IconArrowLeft size={15} /> Kembali</button>
       </div>
 
@@ -142,14 +166,21 @@ export default function NodeForm() {
             </>
           )}
 
-          <div className="row2">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+            <div>
+              <label>Ambang Sedang (cm)</label>
+              <input type="number" value={form.risk_sedang_cm}
+                onChange={(e) => set('risk_sedang_cm', e.target.value)} />
+            </div>
             <div>
               <label>Ambang Waspada (cm)</label>
-              <input type="number" value={form.risk_medium_cm} onChange={(e) => set('risk_medium_cm', e.target.value)} />
+              <input type="number" value={form.risk_medium_cm}
+                onChange={(e) => set('risk_medium_cm', e.target.value)} />
             </div>
             <div>
               <label>Ambang Siaga (cm)</label>
-              <input type="number" value={form.risk_high_cm} onChange={(e) => set('risk_high_cm', e.target.value)} />
+              <input type="number" value={form.risk_high_cm}
+                onChange={(e) => set('risk_high_cm', e.target.value)} />
             </div>
           </div>
 
@@ -157,6 +188,7 @@ export default function NodeForm() {
           <select value={form.status_override || ''} onChange={(e) => set('status_override', e.target.value)}>
             <option value="">Otomatis (ikut sensor)</option>
             <option value="aman">Aman</option>
+            <option value="sedang">Sedang</option>
             <option value="waspada">Waspada</option>
             <option value="siaga">Siaga</option>
           </select>

@@ -1,17 +1,20 @@
 // Hitung status risiko dari ketinggian air memakai ambang per-node.
 // Selaras dengan logika aplikasi mobile (getRiskFromLevel).
 export const riskOf = (levelCm, node = {}) => {
-  const med = Number(node.risk_medium_cm ?? 150);
-  const high = Number(node.risk_high_cm ?? 200);
-  const cm = Number(levelCm);
-  if (cm >= high) return { label: 'Siaga', color: '#E74C3C' };
-  if (cm >= med) return { label: 'Waspada', color: '#F39C12' };
-  return { label: 'Aman', color: '#27AE60' };
+  const sed  = Number(node.risk_sedang_cm ?? 100);
+  const med  = Number(node.risk_medium_cm ?? 150);
+  const high = Number(node.risk_high_cm   ?? 200);
+  const cm   = Number(levelCm);
+  if (cm >= high) return { label: 'Siaga',   color: '#E74C3C' };
+  if (cm >= med)  return { label: 'Waspada', color: '#F39C12' };
+  if (cm >= sed)  return { label: 'Sedang',  color: '#F1C40F' };
+                  return { label: 'Aman',    color: '#27AE60' };
 };
 
 // Metadata status manual — nilai disimpan lowercase (selaras kontrak app).
 const STATUS_META = {
   aman: { label: 'Aman', color: '#27AE60' },
+  sedang: { label: 'Sedang', color: '#F1C40F' },
   waspada: { label: 'Waspada', color: '#F39C12' },
   siaga: { label: 'Siaga', color: '#E74C3C' },
   bahaya: { label: 'Siaga', color: '#E74C3C' }, // alias, diperlakukan seperti siaga
@@ -22,6 +25,7 @@ const STATUS_META = {
 export const STATUS_OPTIONS = [
   { value: '', label: 'Otomatis (ikut sensor)' },
   { value: 'aman', label: 'Aman' },
+  { value: 'sedang', label: 'Sedang' },
   { value: 'waspada', label: 'Waspada' },
   { value: 'siaga', label: 'Siaga' },
 ];
