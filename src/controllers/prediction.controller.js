@@ -33,17 +33,29 @@ exports.createPrediction = async (req, res) => {
 };
 
 exports.getPredictions = async (req, res) => {
+  const page   = Math.max(1, parseInt(req.query.page)  || 1);
+  const limit  = Math.min(200, Math.max(1, parseInt(req.query.limit) || 50));
+  const offset = (page - 1) * limit;
+
   try {
-    const result = await pool.query('SELECT * FROM ml_predictions');
+    const [countRes, dataRes] = await Promise.all([
+      pool.query('SELECT COUNT(*) FROM ml_predictions'),
+      pool.query(
+        'SELECT * FROM ml_predictions ORDER BY timestamp DESC LIMIT $1 OFFSET $2',
+        [limit, offset],
+      ),
+    ]);
+    const total = parseInt(countRes.rows[0].count, 10);
     res.status(200).json({
       status: 'success',
-      data: result.rows
+      data: dataRes.rows,
+      pagination: { total, page, limit, totalPages: Math.ceil(total / limit) || 1 },
     });
   } catch (error) {
     console.error('Error fetching predictions:', error);
     res.status(500).json({
       status: 'error',
-      message: 'Failed to retrieve predictions from the database.'
+      message: 'Failed to retrieve predictions from the database.',
     });
   }
 };

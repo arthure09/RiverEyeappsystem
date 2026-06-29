@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 const { sendFloodAlert } = require('../services/ntfy');
+const { generatePrediction } = require('../services/prediction.service');
 
 exports.createLog = async (req, res) => {
   const { location_id, water_level_cm } = req.body;
@@ -45,6 +46,12 @@ exports.createLog = async (req, res) => {
       } catch (err) {
         console.error('[notify] Error cek risiko:', err.message);
       }
+
+      try {
+        await generatePrediction(location_id);
+      } catch (err) {
+        console.error('[prediction] Error generate prediksi:', err.message);
+      }
     });
   } catch (error) {
     console.error('Error recording sensor log:', error);
@@ -56,9 +63,33 @@ exports.createLog = async (req, res) => {
 };
 
 exports.getLogs = async (req, res) => {
+  const page   = Math.max(1, parseInt(req.query.page)  || 1);
+  const limit  = Math.min(500, Math.max(1, parseInt(req.query.limit) || 100));
+  const offset = (page - 1) * limit;
+  const { from, to } = req.query;
+
+  const conditions = [];
+  const values = [];
+  if (from) { values.push(from); conditions.push(`timestamp >= $${values.length}`); }
+  if (to)   { values.push(to);   conditions.push(`timestamp <= $${values.length}`); }
+
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
   try {
-    const result = await pool.query('SELECT * FROM sensor_logs');
-    res.status(200).json({ status: 'success', data: result.rows });
+    const [countRes, dataRes] = await Promise.all([
+      pool.query(`SELECT COUNT(*) FROM sensor_logs ${where}`, values),
+      pool.query(
+        `SELECT * FROM sensor_logs ${where} ORDER BY timestamp DESC LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
+        [...values, limit, offset],
+      ),
+    ]);
+
+    const total = parseInt(countRes.rows[0].count, 10);
+    res.status(200).json({
+      status: 'success',
+      data: dataRes.rows,
+      pagination: { total, page, limit, totalPages: Math.ceil(total / limit) || 1 },
+    });
   } catch (error) {
     console.error('Error fetching logs:', error);
     res.status(500).json({
